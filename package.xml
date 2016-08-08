@@ -1,0 +1,40 @@
+<package>
+	<name>wintracker</name>
+
+	<description>
+    ROS Driver for the VR-space WinTracker
+
+    To run the wintracker_node without sodo privileges add a rule into /etc/udev/rules.d/80-wintracker.rules
+    $ echo 'SUBSYSTEM=="usb", ATTR{idVendor}=="04b4", ATTR{idProduct}=="64df", MODE="0666"' | sudo tee /etc/udev/rules.d/80-wintracker.rules
+    $ sudo restart udev 
+
+    The wintracker_node is a wrapper around the driver written by Mathias Broxvall.
+  </description>
+	<version>0.0.2</version>
+	<author email="mbrx@aass.oru.se">Mattias Broxvall</author>
+	<author email="todo@todo.com">Krzysztof Charusta</author>
+	<maintainer email="chitt@live.in">Chittaranjan Srinivas Swaminathan</maintainer>
+
+	<license>GPLv3</license>
+
+	<buildtool_depend>catkin</buildtool_depend>
+
+	<build_depend>roscpp</build_depend>
+	<build_depend>tf</build_depend>
+	<build_depend>std_msgs</build_depend>
+	<build_depend>std_srvs</build_depend>
+	<build_depend>geometry_msgs</build_depend>
+	<build_depend>gazebo_msgs</build_depend>
+	
+	<run_depend>roscpp</run_depend>
+	<run_depend>tf</run_depend>
+	<run_depend>std_msgs</run_depend>
+	<run_depend>std_srvs</run_depend>
+	<run_depend>geometry_msgs</run_depend>
+	<run_depend>gazebo_msgs</run_depend>
+
+	<build_depend>message_generation</build_depend>
+  <run_depend>message_runtime</run_depend>
+
+</package>
+	

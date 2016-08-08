@@ -1,8 +1,12 @@
-#include "wintracker_publisher.h"
-#include "WTracker.h"
+#include "wintracker/wintracker_publisher.h"
 #include <ros/ros.h>
 #include <stdlib.h>
 #include <cmath>
+
+extern "C" {
+#include "wintracker/WTracker.h"
+}
+
 //-------------------------------------------------------------------------------------
 WintrackerPublisher::WintrackerPublisher() : nh_("~"), frame_id_("/fixed")
 {                                            

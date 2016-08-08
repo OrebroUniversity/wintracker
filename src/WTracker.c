@@ -2,7 +2,7 @@
 #include <unistd.h> /* for geteuid */
 #include <stdio.h>
 #include <string.h>
-#include "WTracker.h"
+#include <wintracker/WTracker.h>
 
 static const int vendorID=0x04b4;
 static const int productID=0x64df;

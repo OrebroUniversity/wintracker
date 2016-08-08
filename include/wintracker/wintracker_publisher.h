@@ -44,10 +44,10 @@
 
 #include <ros/ros.h>
 #include <string.h>
-#include "../srv_gen/cpp/include/wintracker/GetPose.h"
+#include <wintracker/GetPose.h>
 #include <boost/thread/mutex.hpp>
 #include <Eigen/Core>
-#include "geometry_msgs/PoseStamped.h"
+#include <geometry_msgs/PoseStamped.h>
 #include <deque>
 
 #define JITTER_WINDOW 5

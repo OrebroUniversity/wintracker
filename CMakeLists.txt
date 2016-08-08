@@ -1,43 +1,46 @@
-cmake_minimum_required(VERSION 2.4.6)
-include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
+cmake_minimum_required(VERSION 2.4.6 FATAL_ERROR)
+project(wintracker)
 
-# Set the build type.  Options are:
-#  Coverage       : w/ debug symbols, w/o optimization, w/ code-coverage
-#  Debug          : w/ debug symbols, w/o optimization
-#  Release        : w/o debug symbols, w/ optimization
-#  RelWithDebInfo : w/ debug symbols, w/ optimization
-#  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
-#set(ROS_BUILD_TYPE RelWithDebInfo)
+find_package(catkin REQUIRED COMPONENTS
+	roscpp
+	std_msgs
+	geometry_msgs
+	gazebo_msgs
+	std_srvs
+	tf
+	message_generation
+)
 
-rosbuild_init()
+set(Eigen3_INCLUDE_DIR "$ENV{Eigen3_INCLUDE_DIR}")
+IF(NOT EIGEN3_INCLUDE_DIR)
+    MESSAGE(FATAL_ERROR "Please set the environment variable Eigen3_INCLUDE_DIR to the include directory of your Eigen3 installation. This is usually '/usr/include/eigen3'.")
+ENDIF()
 
-#set the default path for built executables to the "bin" directory
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
-#set the default path for built libraries to the "lib" directory
-set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
+add_service_files(
+	FILES
+	GetPose.srv
+)
 
-set (CMAKE_CXX_COMPILER /usr/bin/g++)
-set (CMAKE_C_COMPILER /usr/bin/g++)
+generate_messages(
+  DEPENDENCIES
+	geometry_msgs
+)
 
-set(WTRACK_SOURCES 
-  src/WTracker.c
-  src/wintracker_node.cpp
-  src/wintracker_publisher.cpp)
+catkin_package(
+	INCLUDE_DIRS include
+	LIBRARIES WTracker
+	CATKIN_DEPENDS roscpp std_msgs geometry_msgs gazebo_msgs std_srvs	tf message_runtime
+)
 
-#rosbuild_add_library(wtracker src/WTracker.cpp)
+include_directories(
+	include
+	${catkin_INCLUDE_DIRS}
+	${Eigen3_INCLUDE_DIR}
+)
 
-#uncomment if you have defined messages
-#rosbuild_genmsg()
-#uncomment if you have defined services
-rosbuild_gensrv()
+add_library(WTracker src/WTracker.c)
+target_link_libraries(WTracker usb)
 
-#common commands for building c++ executables and libraries
-#rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
-#target_link_libraries(${PROJECT_NAME} another_library)
-#rosbuild_add_boost_directories()
-#rosbuild_link_boost(${PROJECT_NAME} thread)
-#rosbuild_add_executable(wintracker_node src/wintracker_node.cpp src/WTracker.cpp)
-rosbuild_add_executable(wintracker_node ${WTRACK_SOURCES})
-target_link_libraries(wintracker_node usb)
-
-#target_link_libraries(wintracker_node WTRACKER_LIB)
+add_executable(wintracker_node src/wintracker_node.cpp src/wintracker_publisher.cpp)
+target_link_libraries(wintracker_node WTracker ${catkin_LIBRARIES})
+add_dependencies(wintracker_node wintracker_gencpp)
