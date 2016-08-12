@@ -317,10 +317,10 @@ void tick_wtracker() {
     wtrackerSensors[sensor].e = wtracker2short(&sensorData[10]) * 0.01;
     wtrackerSensors[sensor].r = wtracker2short(&sensorData[12]) * 0.01;
 
-    wtrackerSensors[sensor].qw = wtracker2short(&sensorData[14]) * 0.01;
-    wtrackerSensors[sensor].qx = wtracker2short(&sensorData[16]) * 0.01;
-    wtrackerSensors[sensor].qy = wtracker2short(&sensorData[18]) * 0.01;
-    wtrackerSensors[sensor].qz = wtracker2short(&sensorData[20]) * 0.01;
+    wtrackerSensors[sensor].qw = wtracker2short(&sensorData[14]) * 0.0001;
+    wtrackerSensors[sensor].qx = wtracker2short(&sensorData[16]) * 0.0001;
+    wtrackerSensors[sensor].qy = wtracker2short(&sensorData[18]) * 0.0001;
+    wtrackerSensors[sensor].qz = wtracker2short(&sensorData[20]) * 0.0001;
 
     wtrackerSensors[sensor].button = wtracker2short(&sensorData[20]);
 

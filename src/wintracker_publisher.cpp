@@ -2,6 +2,7 @@
 #include <ros/ros.h>
 #include <stdlib.h>
 #include <cmath>
+#include <tf/tf.h>
 
 extern "C" {
 #include "wintracker/WTracker.h"
@@ -15,17 +16,17 @@ WintrackerPublisher::WintrackerPublisher() : nh_("~"), frame_id_("/fixed")
   std::string searched_param;
 
   nh_.searchParam("hemisphere_specification",searched_param);
-    nh_.getParam(searched_param, hemisphere_);
+  nh_.getParam(searched_param, hemisphere_);
 
   // searches for parameter with name containing 'wintracker_prefix' 
   nh_.searchParam("wintracker_prefix", searched_param); 
   nh_.getParam(searched_param, prefix);
 
- if (nh_.searchParam("wintracker_frame_id", searched_param)) 
-   {
+  if (nh_.searchParam("wintracker_frame_id", searched_param))
+  {
     nh_.getParam(searched_param, frame_id);
     frame_id_=frame_id;
-   }
+  }
 
   std::string full_topic = prefix + "/pose";
   pub_ = nh_.advertise<geometry_msgs::PoseStamped>(full_topic, 2);
@@ -34,8 +35,8 @@ WintrackerPublisher::WintrackerPublisher() : nh_("~"), frame_id_("/fixed")
 //-------------------------------------------------------------------------------------
 WintrackerPublisher::~WintrackerPublisher()
 {
- ROS_INFO("Shutting down the WinTracker node");
- shutdown_wtracker();
+  ROS_INFO("Shutting down the WinTracker node");
+  shutdown_wtracker();
 }
 //-------------------------------------------------------------------------------------
 bool WintrackerPublisher::getPose(wintracker::GetPose::Request  &req, wintracker::GetPose::Response &res)
@@ -53,17 +54,17 @@ void WintrackerPublisher::startWTracker()
   data_mutex_.lock();
 
   if(initialize_wtracker() != 0) 
-    {
-      ROS_ERROR("Failed to initialize wtracker, exiting");
-      exit(0);
-    }
+  {
+    ROS_ERROR("Failed to initialize wtracker, exiting");
+    exit(0);
+  }
 
   if(hemisphere_=="Up")
     setUpHemisphere();
   else if(hemisphere_=="Front")
     setFrontHemisphere();
   else
-      ROS_WARN("No Hemisphere specified - previous settings are used.");
+    ROS_WARN("No Hemisphere specified - previous settings are used.");
 
   // enable_cont_mode();//Enables the WinTracker to continously send data
 
@@ -74,29 +75,29 @@ void WintrackerPublisher::startWTracker()
   sign_buffer_.resize(7,JITTER_WINDOW);
 
   for (int j=JITTER_WINDOW-1; j >= 0; --j)
-    {
-      tick_wtracker();
-      sign_buffer_(0,j)=signof((float)wtrackerSensors[0].x);  
-      sign_buffer_(1,j)=signof((float)wtrackerSensors[0].y); 
-      sign_buffer_(2,j)=signof((float)wtrackerSensors[0].z);  
-      sign_buffer_(3,j)=signof((float)wtrackerSensors[0].qx); 
-      sign_buffer_(4,j)=signof((float)wtrackerSensors[0].qy); 
-      sign_buffer_(5,j)=signof((float)wtrackerSensors[0].qz);  
-      sign_buffer_(6,j)=signof((float)wtrackerSensors[0].qw);
+  {
+    tick_wtracker();
+    sign_buffer_(0,j)=signof((float)wtrackerSensors[0].x);
+    sign_buffer_(1,j)=signof((float)wtrackerSensors[0].y);
+    sign_buffer_(2,j)=signof((float)wtrackerSensors[0].z);
+    sign_buffer_(3,j)=signof((float)wtrackerSensors[0].qx);
+    sign_buffer_(4,j)=signof((float)wtrackerSensors[0].qy);
+    sign_buffer_(5,j)=signof((float)wtrackerSensors[0].qz);
+    sign_buffer_(6,j)=signof((float)wtrackerSensors[0].qw);
 
-      if(j==0)
-	{
-	  posture_ref_.head(3)=getCurrPos();
-	  posture_ref_.tail(4)=getCurrOri();
-	}
+    if(j==0)
+    {
+      posture_ref_.head(3)=getCurrPos();
+      posture_ref_.tail(4)=getCurrOri();
     }
+  }
 
   data_mutex_.unlock();
 }
 //-------------------------------------------------------------------------------------
 bool WintrackerPublisher::spin() {
   while (ros::ok()) 
-   {
+  {
 
     pub_.publish(getFilteredTick());
 
@@ -107,12 +108,12 @@ bool WintrackerPublisher::spin() {
 //-------------------------------------------------------------------------------------
 Eigen::Vector4f WintrackerPublisher::getCurrOri()
 {
- return Eigen::Vector4f((float)wtrackerSensors[0].qx,(float)wtrackerSensors[0].qy,(float)wtrackerSensors[0].qz,(float)wtrackerSensors[0].qw);
+  return Eigen::Vector4f((float)wtrackerSensors[0].qx,(float)wtrackerSensors[0].qy,(float)wtrackerSensors[0].qz,(float)wtrackerSensors[0].qw);
 }
 //-------------------------------------------------------------------------------------
 Eigen::Vector3f WintrackerPublisher::getCurrPos()
 {
- return Eigen::Vector3f((float)wtrackerSensors[0].x,(float)wtrackerSensors[0].y,(float)wtrackerSensors[0].z);
+  return Eigen::Vector3f((float)wtrackerSensors[0].x,(float)wtrackerSensors[0].y,(float)wtrackerSensors[0].z);
 }
 //-------------------------------------------------------------------------------------
 geometry_msgs::PoseStamped WintrackerPublisher::getFilteredTick()
@@ -140,13 +141,36 @@ geometry_msgs::PoseStamped WintrackerPublisher::getFilteredTick()
   ps.header.frame_id = frame_id_;
   ps.header.stamp=ros::Time::now();
 
+  tf::Matrix3x3 rotationMatrix(tf::Quaternion(curr_ori(0), curr_ori(1), curr_ori(2), curr_ori(3)));
+
+  // Low pass filter.
+  double r,p,y;
+  rotationMatrix.getRPY(r,p,y);
+  static double old_r = r, old_p = p, old_y = y;
+
+  r = (r * 0.7) + (old_r * 0.3);
+  p = (p * 0.7) + (old_p * 0.3);
+  y = (y * 0.7) + (old_y * 0.3);
+
+  old_r = r; old_p = p; old_y = y;
+
+  rotationMatrix.setRPY(r, p, y);
+
+  tf::Quaternion rotation; rotation.setRPY(r, p, y);
+  tf::quaternionTFToMsg(rotation, ps.pose.orientation);
+
+  //ROS_INFO("*******************************");
+  //ROS_INFO("%lf, %lf, %lf", rotationMatrix[0][0], rotationMatrix[0][1], rotationMatrix[0][2]);
+  //ROS_INFO("%lf, %lf, %lf", rotationMatrix[1][0], rotationMatrix[1][1], rotationMatrix[1][2]);
+  //ROS_INFO("%lf, %lf, %lf", rotationMatrix[2][0], rotationMatrix[2][1], rotationMatrix[2][2]);
+
   return ps;
 }
 //-------------------------------------------------------------------------------------
 bool WintrackerPublisher::signsEqual(Eigen::VectorXi const& vec)
 {
 
-  for(unsigned int i=0;i<vec.size()-1;i++)
+  for(unsigned int i = 0; i < vec.size() - 1; i++)
     if(vec(i)*vec(i+1) < 0)
       return false;
 
@@ -200,6 +224,6 @@ Eigen::VectorXi WintrackerPublisher::signof(Eigen::VectorXf vec)
     if(vec(i) < 0.0f)
       signs(i)=(-1);
 
-      return signs;
+  return signs;
 }
 //---------------------------------------------------------------------------
