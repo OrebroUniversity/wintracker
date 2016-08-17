@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.4.6 FATAL_ERROR)
 project(wintracker)
 
 find_package(catkin REQUIRED COMPONENTS
+	cmake_modules
 	roscpp
 	std_msgs
 	geometry_msgs
@@ -11,10 +12,9 @@ find_package(catkin REQUIRED COMPONENTS
 	message_generation
 )
 
-set(Eigen3_INCLUDE_DIR "$ENV{Eigen3_INCLUDE_DIR}")
-IF(NOT EIGEN3_INCLUDE_DIR)
-    MESSAGE(FATAL_ERROR "Please set the environment variable Eigen3_INCLUDE_DIR to the include directory of your Eigen3 installation. This is usually '/usr/include/eigen3'.")
-ENDIF()
+find_package(Eigen3 REQUIRED)
+
+MESSAGE("${EIGEN3_INCLUDE_DIR} are the directories")
 
 add_service_files(
 	FILES
@@ -29,13 +29,13 @@ generate_messages(
 catkin_package(
 	INCLUDE_DIRS include
 	LIBRARIES WTracker
-	CATKIN_DEPENDS roscpp std_msgs geometry_msgs gazebo_msgs std_srvs	tf message_runtime
+	CATKIN_DEPENDS roscpp std_msgs geometry_msgs gazebo_msgs std_srvs	tf message_runtime cmake_modules
 )
 
 include_directories(
 	include
 	${catkin_INCLUDE_DIRS}
-	${Eigen3_INCLUDE_DIR}
+	${EIGEN3_INCLUDE_DIR}
 )
 
 add_library(WTracker src/WTracker.c)
