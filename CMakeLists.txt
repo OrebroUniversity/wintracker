@@ -9,6 +9,8 @@ find_package(catkin REQUIRED COMPONENTS
 	gazebo_msgs
 	std_srvs
 	tf
+	tf_conversions
+	eigen_conversions	
 	message_generation
 )
 
@@ -29,7 +31,7 @@ generate_messages(
 catkin_package(
 	INCLUDE_DIRS include
 	LIBRARIES WTracker
-	CATKIN_DEPENDS roscpp std_msgs geometry_msgs gazebo_msgs std_srvs	tf message_runtime cmake_modules
+	CATKIN_DEPENDS roscpp std_msgs geometry_msgs gazebo_msgs std_srvs tf message_runtime cmake_modules eigen_conversions tf_conversions	
 )
 
 include_directories(
@@ -44,3 +46,6 @@ target_link_libraries(WTracker usb)
 add_executable(wintracker_node src/wintracker_node.cpp src/wintracker_publisher.cpp)
 target_link_libraries(wintracker_node WTracker ${catkin_LIBRARIES})
 add_dependencies(wintracker_node wintracker_gencpp)
+
+add_executable(wintracker_rebase src/WinRebase.cc)
+target_link_libraries(wintracker_rebase ${catkin_LIBRARIES})
