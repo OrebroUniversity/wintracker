@@ -16,14 +16,16 @@ private:
   ros::Subscriber sub_pose;
   ros::ServiceServer srv_synchronize_;
   tf::TransformListener tl;
-  tf::Transform gripper2map;
 
   std::string wrist_frame, base_frame;
   std::string wintracker_topic, rebased_topic;
 
   bool is_set, is_sim_time;
 
-
+  //DEBUG
+ros::Publisher pub_old_pose;
+ros::Publisher pub_emitter_pose;
+    //END DEBUG
 public:
   WinRebaseNode() {
 
@@ -50,6 +52,11 @@ public:
     pub_pose.shutdown();
     sub_pose = n_.subscribe(wintracker_topic, 5, &WinRebaseNode::poseCallback, this);
     pub_pose = nh_.advertise<geometry_msgs::PoseStamped> (rebased_topic,10);
+    //DEBUG
+    pub_old_pose = nh_.advertise<geometry_msgs::PoseStamped> ("old_pose",10);
+    pub_emitter_pose = nh_.advertise<geometry_msgs::PoseStamped> ("emitter_pose",10);
+    //END DEBUG
+
     res.success=true;
     return res.success;
   }	
@@ -93,6 +100,17 @@ public:
 
       tf::poseEigenToMsg(current, newmsg.pose);
       pub_pose.publish(newmsg);
+  
+
+      //DEBUG
+      //publish the old pose expressed in the base frame
+      newmsg.pose=msg->pose;
+      pub_old_pose.publish(newmsg);
+      //publish the emitter expressed in the base frame
+ tf::poseEigenToMsg(reference, newmsg.pose);
+ pub_emitter_pose.publish(newmsg);
+//END DEBUG
+
     }
   }
 
