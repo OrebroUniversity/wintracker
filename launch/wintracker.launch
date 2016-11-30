@@ -9,7 +9,7 @@
     the sensor readings might be incorrect. Valid values are "Front" and "Up".-->
 
     <param name="hemisphere_specification" type="string" value="Up" />
-
+   <!--remap from="/wintracker/pose" to="/wintracker_rebase/pose"/-->
   </node>
 </launch>
 

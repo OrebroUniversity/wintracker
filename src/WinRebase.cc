@@ -88,7 +88,7 @@ public:
 
       geometry_msgs::PoseStamped newmsg;
       newmsg.header.stamp = msg->header.stamp;
-      newmsg.header.frame_id = msg->header.frame_id;
+      newmsg.header.frame_id = base_frame;
       newmsg.header.seq = msg->header.seq;
 
       tf::poseEigenToMsg(current, newmsg.pose);
