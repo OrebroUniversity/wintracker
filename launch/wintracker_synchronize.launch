@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<launch>
+   <!-- Launch wintracker node -->
+   <include file="$(find wintracker)/launch/wintracker.launch"/>
+
+  <node pkg="wintracker" name="wintracker_rebase" type="wintracker_rebase" output="screen">
+  </node>
+</launch>
+

@@ -21,6 +21,7 @@ MESSAGE("${EIGEN3_INCLUDE_DIR} are the directories")
 add_service_files(
 	FILES
 	GetPose.srv
+        Synchronize.srv   
 )
 
 generate_messages(
