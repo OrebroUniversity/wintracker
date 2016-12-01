@@ -23,9 +23,10 @@ private:
   bool is_set, is_sim_time;
 
   //DEBUG
-ros::Publisher pub_old_pose;
-ros::Publisher pub_emitter_pose;
-    //END DEBUG
+  //ros::Publisher pub_old_pose;
+  //ros::Publisher pub_emitter_pose;
+  //END DEBUG
+
 public:
   WinRebaseNode() {
 
@@ -53,8 +54,8 @@ public:
     sub_pose = n_.subscribe(wintracker_topic, 5, &WinRebaseNode::poseCallback, this);
     pub_pose = nh_.advertise<geometry_msgs::PoseStamped> (rebased_topic,10);
     //DEBUG
-    pub_old_pose = nh_.advertise<geometry_msgs::PoseStamped> ("old_pose",10);
-    pub_emitter_pose = nh_.advertise<geometry_msgs::PoseStamped> ("emitter_pose",10);
+    //pub_old_pose = nh_.advertise<geometry_msgs::PoseStamped> ("old_pose",10);
+    //pub_emitter_pose = nh_.advertise<geometry_msgs::PoseStamped> ("emitter_pose",10);
     //END DEBUG
 
     res.success=true;
@@ -104,12 +105,12 @@ public:
 
       //DEBUG
       //publish the old pose expressed in the base frame
-      newmsg.pose=msg->pose;
-      pub_old_pose.publish(newmsg);
+      //newmsg.pose=msg->pose;
+      //pub_old_pose.publish(newmsg);
       //publish the emitter expressed in the base frame
- tf::poseEigenToMsg(reference, newmsg.pose);
- pub_emitter_pose.publish(newmsg);
-//END DEBUG
+      //tf::poseEigenToMsg(reference, newmsg.pose);
+      //pub_emitter_pose.publish(newmsg);
+      //END DEBUG
 
     }
   }
